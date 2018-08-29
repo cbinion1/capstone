@@ -1,26 +1,31 @@
 from rest_framework import serializers
-from .models import Car, Comment
+from .models import Campsites, Reviews
 from django.contrib.auth.models import User
 
+
 class UserSerializer(serializers.ModelSerializer):
-    cars = serializers.PrimaryKeyRelatedField(many=True, queryset=Car.objects.all())
-    comments = serializers.PrimaryKeyRelatedField(many=True, queryset=Comment.objects.all())
+    campsites = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Campsites.objects.all())
+    reviews = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Reviews.objects.all())
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'cars', 'comments')
+        fields = ('id', 'username', 'password')
 
 
-class CarSerializer(serializers.HyperlinkedModelSerializer):
+class CampsitesSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
-        model = Car
-        fields = ('id', 'make', 'model', 'year', 'description', 'img_url', 'images', 'owner')
+        model = Campsites
+        fields = ('id', 'location', 'overview', 'details', 'images', 'rv_sites',
+                  'fire_rings', 'pets_allowed', 'drinking_water', 'toilets', 'reviews', 'owner')
 
 
-class CommentSerializer(serializers.HyperlinkedModelSerializer):
+class ReviewsSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
-    class Meta:
-        model = Comment
-        fields = ('id', 'comment', 'car', 'owner' )
 
+    class Meta:
+        model = Reviews
+        fields = ('id', 'location', 'body', 'rating', 'owner')

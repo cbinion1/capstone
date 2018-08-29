@@ -1,59 +1,68 @@
 # Create your views here.
 from django.shortcuts import render, redirect
+from .models import Campsites, Reviews
+from .forms import CampsitesForm, ReviewsForm
+from pastTents.permissions import IsOwnerOrReadOnly
 
-from .models import Car, Comment
-from .forms import CarForm, CommentForm
+# API-related imports
+from rest_framework import generics, permissions, status
+from .serializers import CampsitesSerializer, ReviewsSerializer
 
-## API-related imports
-from rest_framework import generics
-from .serializers import CarSerializer, CommentSerializer
+# Decorator.  Gets called before a function that has '@login_required' preceeding it.
+# from django.contrib.auth.decorators import login_required
 
-# Decorator.  Gets called before a function that has '@login_required' preceeding it.  
-from django.contrib.auth.decorators import login_required
-
-# To integrate built-in users
+# # To integrate built-in users
 from django.contrib.auth.models import User
-from cars.serializers import UserSerializer
-from rest_framework import permissions
-from cars.permissions import IsOwnerOrReadOnly
+from pastTents.serializers import UserSerializer
 
-class UserList(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
 
-class UserDetail(generics.RetrieveAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+# class UserList(generics.ListAPIView):
+queryset = User.objects.all()
+serializer_class = UserSerializer
 
-class CarList(generics.ListCreateAPIView):
-  # queryset = Car.objects.all().prefetch_related('user')
-  queryset = Car.objects.all()
-  serializer_class = CarSerializer
-  permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-  # permission_classes = (permissions.AllowAny,)
-  def perform_create(self, serializer):
-    serializer.save(owner=self.request.user)
 
-class CarDetail(generics.RetrieveUpdateDestroyAPIView):
-  # queryset = Car.objects.all().prefetch_related('user')
-  queryset = Car.objects.all()
-  serializer_class = CarSerializer
-  permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly) 
-  # permission_classes = (permissions.AllowAny,)
+# class UserDetail(generics.RetrieveAPIView):
+queryset = User.objects.all()
+serializer_class = UserSerializer
 
-class CommentList(generics.ListCreateAPIView):
-  queryset = Comment.objects.all().prefetch_related('car')
-  serializer_class = CommentSerializer
-  permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly) 
-  # permission_classes = (permissions.AllowAny,)
-  def perform_create(self, serializer):
-    serializer.save(owner=self.request.user)
 
-class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
-  queryset = Comment.objects.all().prefetch_related('car')
-  serializer_class = CommentSerializer
-  permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly) 
-  # permission_classes = (permissions.AllowAny,)
+class CampsitesList(generics.ListCreateAPIView):
+    # queryset = Campsites.objects.all().prefetch_related('user')
+    queryset = Campsites.objects.all()
+    serializer_class = CampsitesSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    # permission_classes = (permissions.AllowAny,)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+
+class CampsitesDetail(generics.RetrieveUpdateDestroyAPIView):
+    # queryset = Campsites.objects.all().prefetch_related('user')
+    queryset = Campsites.objects.all()
+    serializer_class = CampsitesSerializer
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    # permission_classes = (permissions.AllowAny,)
+
+
+class ReviewsList(generics.ListCreateAPIView):
+    queryset = Reviews.objects.all().prefetch_related('campsites')
+    serializer_class = ReviewsSerializer
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    # permission_classes = (permissions.AllowAny,)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+
+class ReviewsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Reviews.objects.all().prefetch_related('campsites')
+    serializer_class = ReviewsSerializer
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    # permission_classes = (permissions.AllowAny,)
 
 ############################### CAR ###############################
 
